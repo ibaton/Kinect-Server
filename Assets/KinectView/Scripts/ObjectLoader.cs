@@ -43,5 +43,12 @@ public class ObjectLoader : MonoBehaviour
     {
         DataStore.Instance.Save();
     }
+
+
+    public void OnApplicationQuit()
+    {
+        DataStore.Instance.Save();
+    }
+
 }
 
