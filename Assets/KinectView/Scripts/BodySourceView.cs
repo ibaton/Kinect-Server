@@ -10,7 +10,10 @@ public class BodySourceView : MonoBehaviour
     
     private Dictionary<ulong, GameObject> _Bodies = new Dictionary<ulong, GameObject>();
     private BodySourceManager _BodyManager;
-    
+
+    private const float SIZE_BONE = 2f;
+    private const float SIZE_JOINT = 1f;
+
     private Dictionary<Kinect.JointType, Kinect.JointType> _BoneMap = new Dictionary<Kinect.JointType, Kinect.JointType>()
     {
         { Kinect.JointType.FootLeft, Kinect.JointType.AnkleLeft },
@@ -134,15 +137,12 @@ public class BodySourceView : MonoBehaviour
             lr.SetVertexCount(2);
             lr.material = BoneMaterial;
 			if(jt == Kinect.JointType.HandTipLeft || jt == Kinect.JointType.HandTipRight) {
-            	lr.SetWidth(0.50f, 0.50f);
 				GameObject cube = Instantiate(HandTracker);
 				tracker.TrackerMap[jt] = cube;
 			}
-			else {
-				lr.SetWidth(0.05f, 0.05f);
-			}
+			lr.SetWidth(SIZE_BONE, SIZE_BONE);
             
-            jointObj.transform.localScale = new Vector3(0.3f, 0.3f, 0.3f);
+            jointObj.transform.localScale = new Vector3(SIZE_JOINT, SIZE_JOINT, SIZE_JOINT);
             jointObj.name = jt.ToString();
             jointObj.transform.parent = body.transform;
         }

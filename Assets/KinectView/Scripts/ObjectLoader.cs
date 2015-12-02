@@ -39,12 +39,6 @@ public class ObjectLoader : MonoBehaviour
         }
     }
 
-    public void OnDestroy()
-    {
-        DataStore.Instance.Save();
-    }
-
-
     public void OnApplicationQuit()
     {
         DataStore.Instance.Save();

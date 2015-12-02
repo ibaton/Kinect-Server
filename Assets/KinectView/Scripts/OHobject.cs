@@ -70,11 +70,14 @@ public class OHobject : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (hover)
+        {
+            Debug.Log("hover time " + (Time.fixedTime - hoverTimer));
+        }
         if (hover && (Time.fixedTime - hoverTimer) > HOVER_TIMER)
         {
-            NetworkHandler.getInstance().SendCommand("ON", itemName);
-            Debug.Log("hover time " + (Time.fixedTime - hoverTimer));
-
+            NetworkHandler network = GameObject.Find("MainBase").GetComponentInChildren<NetworkHandler>();
+            network.SendCommand(ServerHostText.host, itemName, "ON");
             hoverTimer = Time.fixedTime;
         }
 
@@ -96,13 +99,36 @@ public class OHobject : MonoBehaviour
         }
     }
 
-    void OnCollisionEnter(Collision collision)
+    public void OnTriggerEnter(Collider other)
     {
         hover = true;
         hoverTimer = Time.fixedTime;
 
         Renderer rend = GetComponent<Renderer>();
         rend.material.color = Color.red;
+
+        Debug.Log("Object OnTriggerEnter");
+    }
+
+    public void OnTriggerExit(Collider other)
+    {
+        Renderer rend = GetComponent<Renderer>();
+        rend.material.color = Color.blue;
+
+        hover = false;
+    }
+
+
+
+    /*void OnCollisionEnter(Collision collision)
+    {
+        hover = true;
+        hoverTimer = Time.fixedTime;
+
+        Renderer rend = GetComponent<Renderer>();
+        rend.material.color = Color.red;
+
+        Debug.Log("Object OnCollisionEnter");
     }
 
     void OnCollisionExit(Collision collision)
@@ -111,7 +137,7 @@ public class OHobject : MonoBehaviour
         rend.material.color = Color.blue;
 
         hover = false;
-    }
+    }*/
 
     void OnMouseOver()
     {
@@ -146,7 +172,6 @@ public class OHobject : MonoBehaviour
             }
 
             DataStore.Instance.AddOhObject(this.gameObject);
-            DataStore.Instance.Save();
         }
     }
 

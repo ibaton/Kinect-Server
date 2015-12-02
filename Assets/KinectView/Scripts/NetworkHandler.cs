@@ -5,39 +5,24 @@ using System.Collections.Generic;
 
 public class NetworkHandler : MonoBehaviour
 {
-
-	public static string host;
-	public static NetworkHandler instance;
-
-	public static NetworkHandler getInstance(){
-		if(instance == null) {
-			instance = new NetworkHandler();
-		}
-		return instance;
-	}
-
-
-	public WWW SendCommand(string command, string itemName)
+	public void SendCommand(string host, string itemName, string command)
 	{
-		//https://home.3hou.se:8443
-		string url = host + "/rest/items/" + itemName; //"hue_LCT001_001788184dbe_1_color";
+		string url = host + "/rest/items/" + itemName;
 		
-		var encoding = new System.Text.UTF8Encoding();
-		var postHeader = new Dictionary<String, String>();
-		
-		postHeader ["Content-Type"] = "text/plain";
-		postHeader["Content-Length"] = ""+ command.Length;
-		
-		Debug.Log("Sent: " + command + " To: " + url);
-		WWW www = new WWW(url, encoding.GetBytes(command), postHeader);
-		
-		StartCoroutine(WaitForRequest(www));
-		return www; 
+		StartCoroutine(WaitForRequest(url, command));
 	}
 	
-	private IEnumerator WaitForRequest(WWW www)
+	private IEnumerator WaitForRequest(String url, String command)
 	{
-		yield return www;
+        var encoding = new System.Text.UTF8Encoding();
+        var postHeader = new Dictionary<String, String>();
+
+        postHeader["Content-Type"] = "text/plain";
+        postHeader["Content-Length"] = "" + command.Length;
+
+        Debug.Log("Sent: " + command + " To: " + url);
+        WWW www = new WWW(url, encoding.GetBytes(command), postHeader);
+        yield return www;
 		
 		// check for errors
 		if (www.error == null)
