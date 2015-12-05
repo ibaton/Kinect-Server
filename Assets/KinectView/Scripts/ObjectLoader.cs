@@ -22,6 +22,8 @@ public class ObjectLoader : MonoBehaviour
             GameObject ohObject = Instantiate(OHObjectRef) as GameObject;
             DataStore.Instance.AddOhObject(ohObject);
 
+            OHobject dataScript = ohObject.GetComponent<OHobject>();
+            dataScript.ItemName = data.objectName;
             ohObject.transform.position = new Vector3(data.positionX, data.positionY, data.positionZ);
             ohObject.transform.localScale = new Vector3(data.size, data.size, data.size);
         }

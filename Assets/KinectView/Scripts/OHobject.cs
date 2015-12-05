@@ -16,10 +16,14 @@ public class OHobject : MonoBehaviour
     private bool selected = false;
     private GameObject inputFieldGo;
 
+    private int hoverCount = 0;
+
     float hoverTimer;
     bool hover = false;
 
     bool state = false;
+
+    private List<Collider> collidedObjects = new List<Collider>();
 
     public bool Selected
     {
@@ -57,12 +61,6 @@ public class OHobject : MonoBehaviour
         rend.material.color = Color.blue;
     }
 
-    /*void OnMouseDrag()
-    {
-        float distance_to_screen = Camera.current.ScreenPointToRay(gameObject.transform.position).z;
-        transform.position = Camera.current.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, distance_to_screen));
-    }*/
-
     private float dist;
     private Vector3 v3Offset;
     private Plane plane;
@@ -70,6 +68,12 @@ public class OHobject : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        List<Collider> removedObjects = collidedObjects.FindAll(colloided => colloided == null);
+        foreach (Collider collider in removedObjects)
+        {
+            OnTriggerExit(collider);
+        }
+
         if (hover)
         {
             Debug.Log("hover time " + (Time.fixedTime - hoverTimer));
@@ -101,43 +105,34 @@ public class OHobject : MonoBehaviour
 
     public void OnTriggerEnter(Collider other)
     {
-        hover = true;
-        hoverTimer = Time.fixedTime;
+        collidedObjects.Add(other);
+        hoverCount++;
+        if (hoverCount == 1)
+        {
+            hover = true;
+            hoverTimer = Time.fixedTime;
 
-        Renderer rend = GetComponent<Renderer>();
-        rend.material.color = Color.red;
-
+            Renderer rend = GetComponent<Renderer>();
+            rend.material.color = Color.red;
+        }
         Debug.Log("Object OnTriggerEnter");
     }
 
     public void OnTriggerExit(Collider other)
     {
-        Renderer rend = GetComponent<Renderer>();
-        rend.material.color = Color.blue;
+        collidedObjects.Remove(other);
+        hoverCount--;
+        if (hoverCount == 0)
+        {
+            Renderer rend = GetComponent<Renderer>();
+            rend.material.color = Color.blue;
 
-        hover = false;
+            hover = false;
+        }
+        Debug.Log("Object OnTriggerExit");
     }
 
 
-
-    /*void OnCollisionEnter(Collision collision)
-    {
-        hover = true;
-        hoverTimer = Time.fixedTime;
-
-        Renderer rend = GetComponent<Renderer>();
-        rend.material.color = Color.red;
-
-        Debug.Log("Object OnCollisionEnter");
-    }
-
-    void OnCollisionExit(Collision collision)
-    {
-        Renderer rend = GetComponent<Renderer>();
-        rend.material.color = Color.blue;
-
-        hover = false;
-    }*/
 
     void OnMouseOver()
     {
@@ -167,11 +162,20 @@ public class OHobject : MonoBehaviour
                 {
                     Debug.Log("OH text " + inputFieldCo.text);
                     itemName = inputFieldCo.text;
-                    DataStore.Instance.AddOhObject(this.gameObject);
                 });
             }
+        }
+    }
 
-            DataStore.Instance.AddOhObject(this.gameObject);
+    static void deselectAll()
+    {
+        foreach (var gameObject in GameObject.FindGameObjectsWithTag("OHItem"))
+        {
+            OHobject ohObject = gameObject.GetComponent<OHobject>();
+            if (ohObject != null)
+            {
+                ohObject.Selected = false;
+            }
         }
     }
 
@@ -192,17 +196,5 @@ public class OHobject : MonoBehaviour
     public void OnDestroy()
     {
         removeUI();
-    }
-
-    static void deselectAll()
-    {
-        foreach (var gameObject in GameObject.FindGameObjectsWithTag("OHItem"))
-        {
-            OHobject ohObject = gameObject.GetComponent<OHobject>();
-            if (ohObject != null)
-            {
-                ohObject.Selected = false;
-            }
-        }
     }
 }

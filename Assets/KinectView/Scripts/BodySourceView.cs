@@ -128,7 +128,9 @@ public class BodySourceView : MonoBehaviour
 
 		TrackingPoints tracker = new TrackingPoints ();
 		_TrackerMap[body] = tracker;
+
         
+
 		for (Kinect.JointType jt = Kinect.JointType.SpineBase; jt <= Kinect.JointType.ThumbRight; jt++)
         {
             GameObject jointObj = GameObject.CreatePrimitive(PrimitiveType.Cube);
@@ -136,7 +138,7 @@ public class BodySourceView : MonoBehaviour
             LineRenderer lr = jointObj.AddComponent<LineRenderer>();
             lr.SetVertexCount(2);
             lr.material = BoneMaterial;
-			if(jt == Kinect.JointType.HandTipLeft || jt == Kinect.JointType.HandTipRight) {
+			if(jt == Kinect.JointType.WristLeft || jt == Kinect.JointType.WristRight) {
 				GameObject cube = Instantiate(HandTracker);
 				tracker.TrackerMap[jt] = cube;
 			}
