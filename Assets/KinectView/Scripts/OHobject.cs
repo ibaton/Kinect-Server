@@ -68,9 +68,8 @@ public class OHobject : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        List<Collider> removedObjects = collidedObjects.FindAll(colloided => colloided == null);
-        foreach (Collider collider in removedObjects)
-        {
+        List<Collider> removedObjects = collidedObjects.FindAll(colloided => colloided == null || !colloided.gameObject.activeSelf);
+        foreach (Collider collider in removedObjects) {
             OnTriggerExit(collider);
         }
 

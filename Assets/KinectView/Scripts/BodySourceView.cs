@@ -161,8 +161,7 @@ public class BodySourceView : MonoBehaviour
             Kinect.Joint sourceJoint = body.Joints[jt];
             Kinect.Joint? targetJoint = null;
             
-            if(_BoneMap.ContainsKey(jt))
-            {
+            if(_BoneMap.ContainsKey(jt)) {
                 targetJoint = body.Joints[_BoneMap[jt]];
             }
             
@@ -170,21 +169,47 @@ public class BodySourceView : MonoBehaviour
             jointObj.localPosition = GetVector3FromJoint(sourceJoint);
             
             LineRenderer lr = jointObj.GetComponent<LineRenderer>();
-            if(targetJoint.HasValue)
-            {
+            if(targetJoint.HasValue) {
                 lr.SetPosition(0, jointObj.localPosition);
                 lr.SetPosition(1, GetVector3FromJoint(targetJoint.Value));
                 lr.SetColors(GetColorForState (sourceJoint.TrackingState), GetColorForState(targetJoint.Value.TrackingState));
-            }
-            else
-            {
+            } else {
                 lr.enabled = false;
             }
 
-			if(tracker.TrackerMap.ContainsKey(jt)) {
+            if (tracker.TrackerMap.ContainsKey(jt)) {
 				lr.SetWidth(1.0f, 1.0f);
-				GameObject handCollider = tracker.TrackerMap[jt];
-				handCollider.transform.position = jointObj.localPosition;
+
+                Kinect.Joint wristJoint;
+                Kinect.Joint elbowJoint;
+                Kinect.Joint sholderJoint;
+
+                if (jt == Kinect.JointType.WristRight) {
+                    wristJoint = body.Joints[Kinect.JointType.WristRight];
+                    elbowJoint = body.Joints[Kinect.JointType.ElbowRight];
+                    sholderJoint = body.Joints[Kinect.JointType.ShoulderRight];
+                }
+                else {
+                    wristJoint = body.Joints[Kinect.JointType.WristLeft];
+                    elbowJoint = body.Joints[Kinect.JointType.ElbowLeft];
+                    sholderJoint = body.Joints[Kinect.JointType.ShoulderLeft];
+                }
+
+                Vector3 elbowPosition = new Vector3(elbowJoint.Position.X, elbowJoint.Position.Y, elbowJoint.Position.Z);
+                Vector3 sholderPosition = new Vector3(sholderJoint.Position.X, sholderJoint.Position.Y, sholderJoint.Position.Z);
+                Vector3 wristPosition = new Vector3(wristJoint.Position.X, wristJoint.Position.Y, wristJoint.Position.Z);
+
+                Vector3 previousVector = sholderPosition - elbowPosition;
+                Vector3 nextVector = wristPosition - elbowPosition;
+
+                float angle = Vector3.Angle(previousVector, nextVector);
+
+                GameObject handCollider = tracker.TrackerMap[jt];
+                bool isActive = angle > 140;
+                if (handCollider.activeSelf != isActive) {
+                    handCollider.SetActive(isActive);
+                }
+                handCollider.transform.position = jointObj.localPosition;
 
 				Vector3 previousJoinPosition = GetVector3FromJoint(targetJoint.Value);
 				handCollider.transform.LookAt(previousJoinPosition);
