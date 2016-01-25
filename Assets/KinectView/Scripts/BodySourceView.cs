@@ -14,6 +14,8 @@ public class BodySourceView : MonoBehaviour
     private const float SIZE_BONE = 2f;
     private const float SIZE_JOINT = 1f;
 
+    private const float POINT_ANGLE = 140f;
+
     private Dictionary<Kinect.JointType, Kinect.JointType> _BoneMap = new Dictionary<Kinect.JointType, Kinect.JointType>()
     {
         { Kinect.JointType.FootLeft, Kinect.JointType.AnkleLeft },
@@ -52,33 +54,27 @@ public class BodySourceView : MonoBehaviour
 
     void Update () 
     {
-        if (BodySourceManager == null)
-        {
+        if (BodySourceManager == null) {
             return;
         }
         
         _BodyManager = BodySourceManager.GetComponent<BodySourceManager>();
-        if (_BodyManager == null)
-        {
+        if (_BodyManager == null) {
             return;
         }
         
         Kinect.Body[] data = _BodyManager.GetData();
-        if (data == null)
-        {
+        if (data == null) {
             return;
         }
         
         List<ulong> trackedIds = new List<ulong>();
-        foreach(var body in data)
-        {
-            if (body == null)
-            {
+        foreach(var body in data) {
+            if (body == null) {
             	continue;
           	}
                 
-            if(body.IsTracked)
-            {
+            if(body.IsTracked) {
                 trackedIds.Add (body.TrackingId);
             }
         }
@@ -86,13 +82,11 @@ public class BodySourceView : MonoBehaviour
         List<ulong> knownIds = new List<ulong>(_Bodies.Keys);
         
         // First delete untracked bodies
-        foreach(ulong trackingId in knownIds)
-        {
-            if(!trackedIds.Contains(trackingId))
-            {
+        foreach(ulong trackingId in knownIds) {
+            if(!trackedIds.Contains(trackingId)) {
 				GameObject bodyObject = _Bodies[trackingId];
 
-				foreach(GameObject tracker in _TrackerMap[bodyObject].TrackerMap.Values){
+				foreach(GameObject tracker in _TrackerMap[bodyObject].TrackerMap.Values) {
 					Destroy(tracker);
 				}
 				_TrackerMap.Remove(bodyObject);
@@ -103,17 +97,13 @@ public class BodySourceView : MonoBehaviour
             }
         }
 
-        foreach(var body in data)
-        {
-            if (body == null)
-            {
+        foreach(var body in data) {
+            if (body == null) {
                 continue;
             }
             
-            if(body.IsTracked)
-            {
-                if(!_Bodies.ContainsKey(body.TrackingId))
-                {
+            if(body.IsTracked) {
+                if(!_Bodies.ContainsKey(body.TrackingId)) {
                     _Bodies[body.TrackingId] = CreateBodyObject(body.TrackingId);
                 }
                 
@@ -129,10 +119,7 @@ public class BodySourceView : MonoBehaviour
 		TrackingPoints tracker = new TrackingPoints ();
 		_TrackerMap[body] = tracker;
 
-        
-
-		for (Kinect.JointType jt = Kinect.JointType.SpineBase; jt <= Kinect.JointType.ThumbRight; jt++)
-        {
+		for (Kinect.JointType jt = Kinect.JointType.SpineBase; jt <= Kinect.JointType.ThumbRight; jt++) {
             GameObject jointObj = GameObject.CreatePrimitive(PrimitiveType.Cube);
             
             LineRenderer lr = jointObj.AddComponent<LineRenderer>();
@@ -152,12 +139,10 @@ public class BodySourceView : MonoBehaviour
         return body;
     }
     
-    private void RefreshBodyObject(Kinect.Body body, GameObject bodyObject)
-    {
+    private void RefreshBodyObject(Kinect.Body body, GameObject bodyObject) {
 		TrackingPoints tracker = _TrackerMap[bodyObject];
 
-        for (Kinect.JointType jt = Kinect.JointType.SpineBase; jt <= Kinect.JointType.ThumbRight; jt++)
-        {
+        for (Kinect.JointType jt = Kinect.JointType.SpineBase; jt <= Kinect.JointType.ThumbRight; jt++) {
             Kinect.Joint sourceJoint = body.Joints[jt];
             Kinect.Joint? targetJoint = null;
             
@@ -203,12 +188,13 @@ public class BodySourceView : MonoBehaviour
                 Vector3 nextVector = wristPosition - elbowPosition;
 
                 float angle = Vector3.Angle(previousVector, nextVector);
+                bool isActive = angle > POINT_ANGLE;
 
                 GameObject handCollider = tracker.TrackerMap[jt];
-                bool isActive = angle > 140;
                 if (handCollider.activeSelf != isActive) {
                     handCollider.SetActive(isActive);
                 }
+
                 handCollider.transform.position = jointObj.localPosition;
 
 				Vector3 previousJoinPosition = GetVector3FromJoint(targetJoint.Value);
@@ -219,23 +205,18 @@ public class BodySourceView : MonoBehaviour
         }
     }
     
-    private static Color GetColorForState(Kinect.TrackingState state)
-    {
-        switch (state)
-        {
-        case Kinect.TrackingState.Tracked:
-            return Color.green;
-
-        case Kinect.TrackingState.Inferred:
-            return Color.red;
-
-        default:
-            return Color.black;
+    private static Color GetColorForState(Kinect.TrackingState state) {
+        switch (state) {
+            case Kinect.TrackingState.Tracked:
+                return Color.green;
+            case Kinect.TrackingState.Inferred:
+                return Color.red;
+            default:
+                return Color.black;
         }
     }
     
-    private static Vector3 GetVector3FromJoint(Kinect.Joint joint)
-    {
+    private static Vector3 GetVector3FromJoint(Kinect.Joint joint) {
         return new Vector3(joint.Position.X * 10, joint.Position.Y * 10, joint.Position.Z * 10);
     }
 

@@ -54,6 +54,19 @@ public class OHobject : MonoBehaviour
         }
     }
 
+    public bool State
+    {
+        get
+        {
+            return this.state;
+        }
+        set
+        {
+            state = value;
+            GetNetworkHandler().PublishItemList();
+        }
+    }
+
     // Use this for initialization
     void Start()
     {
@@ -64,6 +77,10 @@ public class OHobject : MonoBehaviour
     private float dist;
     private Vector3 v3Offset;
     private Plane plane;
+
+    private NetworkHandler GetNetworkHandler() {
+        return GameObject.Find("MainBase").GetComponentInChildren<NetworkHandler>();
+    }
 
     // Update is called once per frame
     void Update()
@@ -80,7 +97,6 @@ public class OHobject : MonoBehaviour
         if (hover && (Time.fixedTime - hoverTimer) > HOVER_TIMER)
         {
             NetworkHandler network = GameObject.Find("MainBase").GetComponentInChildren<NetworkHandler>();
-            network.SendCommand(ServerHostText.host, itemName, "ON");
             hoverTimer = Time.fixedTime;
         }
 
@@ -98,6 +114,7 @@ public class OHobject : MonoBehaviour
             if (Input.GetKeyDown("delete"))
             {
                 DataStore.Instance.RemoveOhObject(this.gameObject);
+                GetNetworkHandler().PublishItemList();
             }
         }
     }
@@ -113,6 +130,8 @@ public class OHobject : MonoBehaviour
 
             Renderer rend = GetComponent<Renderer>();
             rend.material.color = Color.red;
+
+            State = true; 
         }
         Debug.Log("Object OnTriggerEnter");
     }
@@ -127,6 +146,8 @@ public class OHobject : MonoBehaviour
             rend.material.color = Color.blue;
 
             hover = false;
+
+            State = false;
         }
         Debug.Log("Object OnTriggerExit");
     }
@@ -137,7 +158,7 @@ public class OHobject : MonoBehaviour
     {
         if (Input.GetMouseButtonDown(0))
         {
-            bool isSelected = true;
+            bool isSelected = !Selected;
             deselectAll();
             Selected = isSelected;
 
@@ -161,7 +182,12 @@ public class OHobject : MonoBehaviour
                 {
                     Debug.Log("OH text " + inputFieldCo.text);
                     itemName = inputFieldCo.text;
+                    GetNetworkHandler().PublishItemList();
                 });
+            }
+            else
+            {
+                deselectAll();
             }
         }
     }

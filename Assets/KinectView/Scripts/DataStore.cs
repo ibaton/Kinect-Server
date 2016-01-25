@@ -11,8 +11,9 @@ public class DataStore {
 
 	private static DataStore instance;
 	List<GameObject> ohObjects = new List<GameObject>();
-	
-	public static DataStore Instance {
+    List<OHobject> ohObjectData = new List<OHobject>();
+
+    public static DataStore Instance {
 		get {
 			if(instance == null){
 				instance = new DataStore();
@@ -24,14 +25,24 @@ public class DataStore {
 	public void AddOhObject(GameObject ohObject) {
 		if(!ohObjects.Contains(ohObject)){
 			ohObjects.Add(ohObject);
-		}
+            ohObjectData.Add(ohObject.GetComponent<OHobject>());
+        }
 	}
 
     public void RemoveOhObject(GameObject ohObject)
     {
+        ohObjectData.Remove(ohObject.GetComponent<OHobject>());
         ohObjects.Remove(ohObject);
         GameObject.Destroy(ohObject);
         Save();
+    }
+
+    public List<GameObject> GetObjects() {
+        return ohObjects;
+    }
+
+    public List<OHobject> GetObjectData(){
+        return ohObjectData;
     }
 
     public void Save() {
@@ -79,6 +90,4 @@ public class DataStore {
 		Debug.Log("Loaded " + data.Count + " dataobjects");
 		return data;
 	}
-
-
 }

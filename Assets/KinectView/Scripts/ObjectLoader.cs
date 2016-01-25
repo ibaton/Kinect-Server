@@ -30,14 +30,19 @@ public class ObjectLoader : MonoBehaviour
         Debug.Log("Data objects loaded");
     }
 
+    private NetworkHandler GetNetworkHandler()
+    {
+        return GameObject.Find("MainBase").GetComponentInChildren<NetworkHandler>();
+    }
+
     public void Update()
     {
-        if (Input.GetKeyDown("space"))
-        {
+        if (Input.GetKeyDown("space")) {
             GameObject ohObject = Instantiate(OHObjectRef) as GameObject;
             ohObject.transform.position = new Vector3(0, 0, 0);
             DataStore.Instance.AddOhObject(ohObject);
             Debug.Log("Added new oh object");
+            GetNetworkHandler().PublishItemList();
         }
     }
 
@@ -45,6 +50,5 @@ public class ObjectLoader : MonoBehaviour
     {
         DataStore.Instance.Save();
     }
-
 }
 
